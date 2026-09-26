@@ -191,7 +191,6 @@
       position: relative;
     }
 
-    /* 長方形也能完整塞入且不變形 */
     .photo-box {
       width: 100%;
       height: 200px;
@@ -249,7 +248,7 @@
       display: none;
     }
 
-    /* 彈跳視窗 Modal (任務收費表) */
+    /* 彈跳視窗 Modal */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -341,24 +340,24 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
 
-    // 🔴 請將此處替換為你在 Firebase 專案設定複製出來的 config
+    // ✅ 已補齊 databaseURL
     const firebaseConfig = {
-   apiKey: "AIzaSyBj3QeyFZrAPuIj-N0whuv_ZawNHWoCxLM",
-   authDomain: "absurd-daily-life.firebaseapp.com",
-   projectId: "absurd-daily-life",
-   storageBucket: "absurd-daily-life.firebasestorage.app",
-   messagingSenderId: "968350365914",
-   appId: "1:968350365914:web:e8bc206c872c66ef2acde3",
-   measurementId: "G-Y2765Z3JHB"
-  };
-
+      apiKey: "AIzaSyBj3QeyFZrAPuIj-N0whuv_ZawNHWoCxLM",
+      authDomain: "absurd-daily-life.firebaseapp.com",
+      databaseURL: "https://absurd-daily-life-default-rtdb.firebaseio.com",
+      projectId: "absurd-daily-life",
+      storageBucket: "absurd-daily-life.firebasestorage.app",
+      messagingSenderId: "968350365914",
+      appId: "1:968350365914:web:e8bc206c872c66ef2acde3",
+      measurementId: "G-Y2765Z3JHB"
+    };
 
     // 初始化 Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const memoriesRef = ref(db, 'memories');
 
-    // 監聽 Firebase 即時資料庫變動（任何裝置新增/刪除，即時渲染）
+    // 監聽 Firebase 即時資料庫變動
     onValue(memoriesRef, (snapshot) => {
       const dynamicCards = document.querySelectorAll('.dynamic-polaroid');
       dynamicCards.forEach(card => card.remove());
@@ -370,6 +369,9 @@
           appendPhotoToDOM(key, item);
         });
       }
+    }, (error) => {
+      console.error("資料庫讀取失敗：", error);
+      alert("資料讀取失敗，請確認 Firebase 資料庫規則是否設定為允許讀寫：\n" + error.message);
     });
 
     // 檔案選取處理
@@ -388,7 +390,7 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const maxDim = 600; // 壓縮長寬以符合即時資料庫傳輸
+          const maxDim = 600;
           let width = img.width;
           let height = img.height;
 
@@ -415,7 +417,8 @@
           }).then(() => {
             e.target.value = '';
           }).catch(err => {
-            alert('上傳失敗，請確認 Firebase 安全規則是否開啟讀寫：' + err.message);
+            console.error("上傳失敗：", err);
+            alert('上傳失敗！原因：' + err.message + '\n\n請務必檢查 Firebase Realtime Database 的「規則」是否允許 .read 和 .write 為 true。');
           });
         };
         img.src = evt.target.result;
@@ -425,7 +428,7 @@
 
     // 刪除 Firebase 中的照片
     window.deletePhoto = function(key) {
-      if (!confirm('確定要從雲端刪除這張回憶嗎？所有人都將看不到這張照片。')) return;
+      if (!confirm('確定要從雲端刪除這張回憶嗎？所有裝置上的這張照片都會消失。')) return;
       const itemRef = ref(db, `memories/${key}`);
       remove(itemRef);
     };
@@ -484,7 +487,7 @@
     <!-- 橫向長方形上傳鍵 與 點擊驚喜並排 -->
     <div class="action-control-group">
       <button class="btn-horizontal-upload" onclick="triggerUpload()">
-        <span></span> 上傳照片（高級吧）
+        <span>📤</span> 上傳照片（高級吧）
       </button>
       <button class="btn-bless" onclick="openModal()">點擊驚喜</button>
     </div>
