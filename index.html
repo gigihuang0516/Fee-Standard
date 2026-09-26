@@ -107,7 +107,7 @@
       color: #44403c;
     }
 
-    /* 記憶照片標題 */
+    /* 照片牆標題 */
     .memory-title {
       font-size: 1.25rem;
       font-weight: 600;
@@ -116,7 +116,7 @@
       color: var(--text-main);
     }
 
-    /* 今天很想睡覺下方的操作控制區（橫向長方形上傳 + 驚喜按鈕並排） */
+    /* 橫向長方形上傳鍵 與 點擊驚喜並排 */
     .action-control-group {
       display: flex;
       gap: 12px;
@@ -195,7 +195,7 @@
     .photo-box {
       width: 100%;
       height: 200px;
-      background: #1e1e24; /* 底色托襯，任何比例照片都能舒適顯示 */
+      background: #1e1e24;
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -208,7 +208,7 @@
       max-height: 100%;
       width: auto;
       height: auto;
-      object-fit: contain; /* 完整保留長方形原圖不被裁切 */
+      object-fit: contain;
       display: block;
     }
 
@@ -335,6 +335,117 @@
       font-size: 0.85rem;
     }
   </style>
+
+  <!-- 引入 Firebase SDK (Modular CDN) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+    // 🔴 請將此處替換為你在 Firebase 專案設定複製出來的 config
+    const firebaseConfig = {
+   apiKey: "AIzaSyBj3QeyFZrAPuIj-N0whuv_ZawNHWoCxLM",
+   authDomain: "absurd-daily-life.firebaseapp.com",
+   projectId: "absurd-daily-life",
+   storageBucket: "absurd-daily-life.firebasestorage.app",
+   messagingSenderId: "968350365914",
+   appId: "1:968350365914:web:e8bc206c872c66ef2acde3",
+   measurementId: "G-Y2765Z3JHB"
+  };
+
+
+    // 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const memoriesRef = ref(db, 'memories');
+
+    // 監聽 Firebase 即時資料庫變動（任何裝置新增/刪除，即時渲染）
+    onValue(memoriesRef, (snapshot) => {
+      const dynamicCards = document.querySelectorAll('.dynamic-polaroid');
+      dynamicCards.forEach(card => card.remove());
+
+      const data = snapshot.val();
+      if (data) {
+        Object.keys(data).forEach(key => {
+          const item = data[key];
+          appendPhotoToDOM(key, item);
+        });
+      }
+    });
+
+    // 檔案選取處理
+    window.handleFile = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const caption = prompt('請輸入這張照片的專屬文案：', '荒謬瞬間');
+      if (caption === null) {
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 600; // 壓縮長寬以符合即時資料庫傳輸
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+          // 推送到 Firebase
+          push(memoriesRef, {
+            src: compressedBase64,
+            caption: caption.trim() || '未命名回憶',
+            timestamp: Date.now()
+          }).then(() => {
+            e.target.value = '';
+          }).catch(err => {
+            alert('上傳失敗，請確認 Firebase 安全規則是否開啟讀寫：' + err.message);
+          });
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // 刪除 Firebase 中的照片
+    window.deletePhoto = function(key) {
+      if (!confirm('確定要從雲端刪除這張回憶嗎？所有人都將看不到這張照片。')) return;
+      const itemRef = ref(db, `memories/${key}`);
+      remove(itemRef);
+    };
+
+    // 將照片卡片加入 DOM
+    function appendPhotoToDOM(key, item) {
+      const grid = document.getElementById('grid');
+      const card = document.createElement('div');
+      card.className = 'polaroid dynamic-polaroid';
+      card.id = `card-${key}`;
+      card.innerHTML = `
+        <button class="btn-delete-item" onclick="deletePhoto('${key}')" title="刪除照片">✕</button>
+        <div class="photo-box">
+          <img src="${item.src}" alt="${item.caption}">
+        </div>
+        <div class="polaroid-caption">${item.caption}</div>
+      `;
+      grid.appendChild(card);
+    }
+  </script>
 </head>
 <body>
 
@@ -357,7 +468,7 @@
     <div class="letter-section">
       <p>竹：</p>
       <p>
-        這整張妳一定覺得很好笑(應該吧??) 但我QR code還是很有創意的，而且用這個很好玩
+        這整張妳一定覺得很好笑(應該吧??) 但我QR code還是很有創意的
       </p>
       <p>
         這邊其實我沒想到可以寫什麼，所以放這些東西
@@ -373,7 +484,7 @@
     <!-- 橫向長方形上傳鍵 與 點擊驚喜並排 -->
     <div class="action-control-group">
       <button class="btn-horizontal-upload" onclick="triggerUpload()">
-        <span></span> 上傳照片（高級的）
+        <span></span> 上傳照片（高級吧）
       </button>
       <button class="btn-bless" onclick="openModal()">點擊驚喜</button>
     </div>
@@ -408,9 +519,6 @@
       <h2 style="font-size: 1.35rem; color: var(--border-color); text-align: center; margin-bottom: 6px;">
         管家任務價目表
       </h2>
-      <p style="font-size: 0.85rem; color: #868e96; text-align: center; margin-bottom: 16px;">
-        ※ 持有「私人管家服務券」可享終身霸王折抵
-      </p>
 
       <table class="price-table">
         <thead>
@@ -421,137 +529,30 @@
         </thead>
         <tbody>
           <tr>
-            <td>寫作業</td>
+            <td>做作業</td>
             <td><span class="price-badge">陪我吃飯</span></td>
           </tr>
           <tr>
-            <td>叫起床服務</td>
-            <td><span class="price-badge">我絕對醒了</span></td>
+            <td>起床服務</td>
+            <td><span class="price-badge">我一定醒了</span></td>
           </tr>
           <tr>
-            <td>期末報告精神支柱</td>
-            <td><span class="price-badge">這時薪1000的</span></td>
+            <td>期末報告</td>
+            <td><span class="price-badge">這時薪一千的</span></td>
           </tr>
         </tbody>
       </table>
 
       <div style="margin-top: 20px; font-size: 0.85rem; color: #495057; background: #f8f9fa; padding: 12px; border-radius: 10px;">
-         <strong>備註條款：</strong><br>
-        沒有啦~ 都是我真的想幫妳的
+        <strong>備註條款：</strong><br>
+        沒有啦~我開玩笑的 我真心想幫妳的
       </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'butler_uploaded_memories';
-
-    // 頁面載入時取出已儲存的照片
-    window.addEventListener('DOMContentLoaded', () => {
-      loadSavedPhotos();
-    });
-
     function triggerUpload() {
       document.getElementById('file-input').click();
-    }
-
-    function handleFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      // 詢問使用者要輸入什麼文案
-      const caption = prompt('請輸入這張照片的專屬文案：', '荒謬瞬間');
-      if (caption === null) {
-        e.target.value = '';
-        return; // 使用者按取消
-      }
-
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        // 利用 Canvas 進行圖片尺寸壓縮，避免超出 localStorage 5MB 限制
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const maxDim = 800; // 最長邊限制
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // 壓縮為 JPEG 格式
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-
-          const photoItem = {
-            id: Date.now(),
-            src: compressedDataUrl,
-            caption: caption.trim() || '未命名回憶'
-          };
-
-          savePhoto(photoItem);
-          appendPhotoToDOM(photoItem, true);
-          e.target.value = ''; // 重置 input 讓同一張圖還能再次選
-        };
-        img.src = evt.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // 儲存至 localStorage
-    function savePhoto(item) {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        saved.push(item);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-      } catch (err) {
-        alert('儲存空間不足，請刪除部分照片後再試！');
-      }
-    }
-
-    // 載入已儲存的照片
-    function loadSavedPhotos() {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      saved.forEach(item => appendPhotoToDOM(item, false));
-    }
-
-    // 加入卡片到畫面
-    function appendPhotoToDOM(item, shouldScroll) {
-      const grid = document.getElementById('grid');
-      const card = document.createElement('div');
-      card.className = 'polaroid';
-      card.id = `card-${item.id}`;
-      card.innerHTML = `
-        <button class="btn-delete-item" onclick="deletePhoto(${item.id})" title="刪除照片">✕</button>
-        <div class="photo-box">
-          <img src="${item.src}" alt="${item.caption}">
-        </div>
-        <div class="polaroid-caption">${item.caption}</div>
-      `;
-      grid.appendChild(card);
-
-      if (shouldScroll) {
-        card.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    // 刪除照片
-    function deletePhoto(id) {
-      if (!confirm('確定要刪除這張回憶嗎？')) return;
-      let saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-      saved = saved.filter(item => item.id !== id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-
-      const el = document.getElementById(`card-${id}`);
-      if (el) el.remove();
     }
 
     /* Modal 控制 */
@@ -569,7 +570,6 @@
       }
     }
 
-    // 按 Esc 鍵也可以關閉視窗
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeModal();
     });
