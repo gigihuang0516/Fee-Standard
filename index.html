@@ -2,24 +2,373 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>即將推出 | Coming Soon</title>
+  <meat name="viewport" content="width=devic-width, initial-scale=1.0">
+  <title>我沒有想到標題</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #0f172a; color: #f8fafc; text-align: center; padding: 24px; }
-    .card { max-width: 480px; width: 100%; background: #1e293b; padding: 48px 32px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    h1 { font-size: 1.8rem; margin-bottom: 12px; color: #38bdf8; }
-    p { color: #94a3b8; line-height: 1.6; margin-bottom: 24px; font-size: 1rem; }
-    .badge { display: inline-block; background: #334155; color: #cbd5e1; padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; margin-bottom: 20px; }
-    .contact { font-size: 0.9rem; color: #64748b; }
+    :root{
+      --bg: #ECF5FF;
+      --card-bg:  #ffffff;
+      --primary: #8080C0;
+      --text-main: #FF5809;
+      --text-muted: #000000;
+      --border-color: #003D79;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BllinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+    body{
+      background-color: var(--bg);
+      color:var(--text-main);
+      line-height: 1.8;
+      padding: 32px 16px 64px;
+    }
+
+    .container{
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /*頂部信頭*/
+    .header-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 36px 24px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+      margin-bottm: 24px;
+    }
+
+    .tag{
+      dispalay: inline-block;
+      font-size: 0.82rem;
+      letter-spacing: 2px;
+      color: var(--primary);
+      background: 	#EBD3E8;
+      padding: 4px 14px;
+      border-radius: 50px;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .subtitle{
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* 進度條 */
+    .progress-box {
+      margin-top: 20px;
+      background: #f7f4ef;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #6b6560;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #e5ded7;
+      border-radius: 4px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      width: 35%;
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    /* 信件內容 */
+    .letter-section {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 32px 24px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    .letter-section p {
+      margin-bottom: 16px;
+      font-size: 0.98rem;
+      color: #44403c;
+    }
+
+    .highlight {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* 拍立得照片牆 */
+    .memory-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      color: var(--text-main);
+    }
+
+    .polaroid-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    @media (min-width: 480px) {
+      .polaroid-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .polaroid {
+      background: #fff;
+      padding: 12px 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #e7e5e4;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .photo-box {
+      width: 100%;
+      height: 200px;
+      background: #f5f5f4;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .polaroid-caption {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* 未來待續上傳區塊 */
+    .future-slot {
+      border: 2px dashed var(--border-color);
+      background: rgba(255,255,255,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 24px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .future-slot:hover {
+      background: #faf5f0;
+      border-color: var(--primary);
+    }
+
+    .future-icon {
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+    }
+
+    .future-text {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* 承諾條款 */
+    .pledge-card {
+      background: #faf7f2;
+      border-left: 4px solid var(--primary);
+      padding: 22px 18px;
+      border-radius: 0 16px 16px 0;
+      margin-bottom: 28px;
+    }
+
+    .pledge-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    .pledge-card ul {
+      list-style-type: none;
+      font-size: 0.9rem;
+      color: #57534e;
+    }
+
+    .pledge-card li {
+      margin-bottom: 6px;
+    }
+
+    /* 底部按鈕 */
+    .footer-action {
+      text-align: center;
+    }
+
+    .btn-bless {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 13px 28px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(194, 139, 106, 0.25);
+    }
+
+    #blessing-toast {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--primary);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .visible {
+      opacity: 1 !important;
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <span class="badge">籌備中</span>
-    <h1>新網站即將上線</h1>
-    <p>內容正在加緊製作中，敬請期待更完整的功能與體驗！</p>
-    <div class="contact">如有急事請洽詢相關負責人</div>
+
+  <div class="container">
+    <!-- 頂部信頭與進度 -->
+    <div class="header-card">
+      <div class="tag">BUTLER SERVICE PASS · SPECIAL EDITION</div>
+      <h1>各種荒謬</h1>
+      <div class="subtitle">這張服務券沒有到期日，如同我們的大學旅程。</div>
+      
+      <div class="progress-box">
+        <div>進度：<strong>進行中（35%）</strong></div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 內文信件 -->
+    <div class="letter-section">
+      <p>竹：</p>
+      <p>
+        這整張妳一定覺得很好笑(應該吧??) 但我QR code還是很有創意的
+      </p>
+      <p>
+        很好笑，我手機裡面妳的照片都是不知道在幹嘛的哈哈，但睡覺的特多，搞不好畢業的時候都可以變成一整本了。
+      </p>
+    </div>
+
+    <!-- 照片牆與待續插槽 -->
+    <div class="memory-title">今天很想睡覺</div>
+    <div class="polaroid-grid" id="grid">
+      <!-- 目前已有的照片 1 -->
+      <div class="polaroid">
+        <div class="photo-box">
+          <img src="photo1.jpg" onerror="this.src='https://placehold.co/400x300/f5efe6/a89f91?text=回憶相片+1'" alt="大一回憶">
+        </div>
+        <div class="polaroid-caption">大一初見與荒謬起點</div>
+      </div>
+
+      <!-- 目前已有的照片 2 -->
+      <div class="polaroid">
+        <div class="desktop">
+          <img src="01.jpg" onerror="this.src='https://placehold.co/400x300/f5efe6/a89f91?text=回憶相片+2'" alt="日常回憶">
+        </div>
+        <div class="polaroid-caption">某天練校慶拉拉結束後，到底在笑什麼?我只記得我要按錄影沒按到</div>
+      </div>
+
+      <!-- 未來待續預留格 1 -->
+      <div class="polaroid future-slot" onclick="triggerUpload('大三解鎖的新冒險')">
+        <div class="future-icon">⏳</div>
+        <div class="future-text">
+          <strong>大三未完待續</strong><br>
+          <span style="font-size: 0.75rem;">點擊可立即放一張手機照片試試！</span>
+        </div>
+      </div>
+
+      <!-- 未來待續預留格 2 -->
+      <div class="polaroid future-slot" onclick="triggerUpload('大四畢業那天的約定')">
+        <div class="future-icon">🎓</div>
+        <div class="future-text">
+          <strong>大四與畢業倒數</strong><br>
+          <span style="font-size: 0.75rem;">留給未來的我們填滿</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 隱藏的檔案上傳標籤 -->
+    <input type="file" id="file-input" accept="image/*" onchange="handleFile(event)">
+
+    <!-- 管家終生承諾 -->
+    <div class="pledge-card">
+      <h3>📜 隱藏版管家條款：</h3>
+      <ul>
+        <li>✦ 大二到畢業：期中期末只要喊累，管家保證隨時聽你訴苦。</li>
+        <li>✦ 畢業之後：無論大家各自走到哪裡，這張券永久有效、無條件履約。</li>
+      </ul>
+    </div>
+
+    <!-- 底部按鈕 -->
+    <div class="footer-action">
+      <button class="btn-bless" onclick="sendBlessing()">點擊領取生日祝福 🎂</button>
+      <div id="blessing-toast">🎉 祝老大生日快樂！願我們的回憶越來越厚！</div>
+    </div>
   </div>
+
+  <script>
+    let currentSlot = null;
+
+    function triggerUpload(caption) {
+      currentSlot = caption;
+      document.getElementById('file-input').click();
+    }
+
+    function handleFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          const newCard = document.createElement('div');
+          newCard.className = 'polaroid';
+          newCard.innerHTML = `
+            <div class="photo-box">
+              <img src="${evt.target.result}" alt="即時新增回憶">
+            </div>
+            <div class="polaroid-caption">${currentSlot}</div>
+          `;
+          document.getElementById('grid').appendChild(newCard);
+          newCard.scrollIntoView({ behavior: 'smooth' });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function sendBlessing() {
+      const toast = document.getElementById('blessing-toast');
+      toast.classList.add('visible');
+    }
+  </script>
 </body>
 </html>
